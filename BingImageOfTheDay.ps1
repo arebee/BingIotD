@@ -7,7 +7,7 @@ if (!(Test-Path $dst_dir -PathType Container)) {
 }
 $validFileTypes = ("jpg","jpeg","png")
 $targetRes = "1920x1080" # Retina MacBook Pro 2015
-[Int32]$numberOfImagesToFetch = 20
+[Int32]$numberOfImagesToFetch = 1
 [Int32]$urlPageSize = 8
 [Int32]$page = 0
 [Int32]$remainder = 0
@@ -87,21 +87,16 @@ foreach ($image in (Select-Xml '//image' $rss_feed)) {
     [string]$urlBase = $image.Node.Item('urlBase').InnerText
     [string]$url = $image.Node.Item('url').InnerText
     [string]$type = $url.Substring($url.LastIndexOf('.')+1)
-    [string]$itemDateFileName = $image.Node.Item('startdate').InnerText -replace "(\d\d\d\d)(\d\d)(\d\d)",'$1-$2-$3'
+    [string]$itemDateFileName = 'Bing Image of the Day'
     if (($urlBase -ne $null) -and ($itemDateFileName -ne $null) -and ($type -in $validFileTypes)) {
         Write-Verbose "Valid"
         $itemDateFileName = $itemDateFileName + '.' + $type.tolower()
         # Write-Verbose "$urlBase`n$url`n$itemDateFileName`n$type"
         $outFileName = join-path $dst_dir $itemDateFileName
         # Write-Verbose $outFileName
-        if ((Test-Path -Path $outFileName -PathType Leaf) -eq $False) {
-            $imageUrl = $root_url + $urlBase + "_$targetRes." + $type
-            Write-Verbose "Fetching $imageUrl"
-            Invoke-Webrequest -Uri $imageUrl -OutFile $outFileName | Out-Null
-        }
-        else {
-            Write-Verbose "$outFileName exists already"
-        }
+        $imageUrl = $root_url + $urlBase + "_$targetRes." + $type
+        Write-Verbose "Fetching $imageUrl"
+        Invoke-Webrequest -Uri $imageUrl -OutFile $outFileName | Out-Null
     }
 }
 
